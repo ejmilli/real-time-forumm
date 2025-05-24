@@ -4,16 +4,13 @@ import (
 	"database/sql"
 	"net/http"
 	"time"
+	"real-time-forum/models"
 
 	"github.com/gofrs/uuid"
 )
 
 
-type Session struct {
-	UserID    string
-	Nickname  string
-	ExpiresAt time.Time
-}
+
 
 
 // CreateSession inserts a new session and sets a cookie
@@ -47,13 +44,13 @@ func CreateSession(db *sql.DB, w http.ResponseWriter, userID, nickname string) (
 }
 
 // GetSession retrieves the session info if valid
-func GetSession(db *sql.DB, r *http.Request) *Session {
+func GetSession(db *sql.DB, r *http.Request) *models.Session {
 	cookie, err := r.Cookie("session")
 	if err != nil {
 		return nil
 	}
 
-	var sess Session
+	var sess models.Session
 	err = db.QueryRow(`
 		SELECT user_id, nickname, expires_at FROM sessions WHERE id = ?`,
 		cookie.Value,

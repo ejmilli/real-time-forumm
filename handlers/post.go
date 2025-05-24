@@ -32,7 +32,7 @@ func PostsHandler(db *sql.DB) http.HandlerFunc {
 }
 
 // handleGetPosts gets posts with optional category filter
-func handleGetPosts(db *sql.DB, w http.ResponseWriter, r *http.Request, session *Session) {
+func handleGetPosts(db *sql.DB, w http.ResponseWriter, r *http.Request, session *models.Session) {
     category := r.URL.Query().Get("category")
 
     var rows *sql.Rows
@@ -76,7 +76,7 @@ func handleGetPosts(db *sql.DB, w http.ResponseWriter, r *http.Request, session 
 }
 
 // handleCreatePost creates a new post
-func handleCreatePost(db *sql.DB, w http.ResponseWriter, r *http.Request, session *Session) {
+func handleCreatePost(db *sql.DB, w http.ResponseWriter, r *http.Request, session *models.Session) {
     var post models.Post
     err := json.NewDecoder(r.Body).Decode(&post)
     if err != nil {
