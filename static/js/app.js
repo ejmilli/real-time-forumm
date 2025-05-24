@@ -1,9 +1,12 @@
-// Fixed app.js with proper posts integration
+// Fixed app.js with proper posts integration and routing
 import { Router } from "./router.js";
 import { setupPostsPage, setupPostDetailsPage } from "./posts.js";
 
+let currentRouter; // Store router globally for access
+
 document.addEventListener("DOMContentLoaded", () => {
   const router = new Router();
+  currentRouter = router; // Store for global access
 
   // Home route (landing page)
   router.addRoute("/", "homeTemplate");
@@ -17,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
     setupLoginForm(router);
   });
 
-  // Posts route - FIXED: Only defined once
+  // Posts route
   router.addRoute("posts", "postsTemplate", () => {
     // Check authentication first
     isAuthenticated().then((auth) => {
@@ -25,18 +28,19 @@ document.addEventListener("DOMContentLoaded", () => {
         router.navigateTo("login");
       } else {
         // Set up the posts page
-        setupPostsPage();
+        setupPostsPage(router); // Pass router to posts page
       }
     });
   });
 
-  // Post details route (for individual posts)
+  // Post details route (for individual posts) - FIXED: Proper parameter handling
   router.addRoute("post/:id", "postDetailsTemplate", (params) => {
     isAuthenticated().then((auth) => {
       if (!auth) {
         router.navigateTo("login");
       } else {
-        setupPostDetailsPage(params.id);
+        console.log("Setting up post details for ID:", params.id);
+        setupPostDetailsPage(params.id, router); // Pass router to post details
       }
     });
   });
@@ -317,12 +321,39 @@ function showMessage(message, isError = true) {
   }
 }
 
-// Register event listeners for navigation links
+// FIXED: Improved navigation link handling
 document.addEventListener("click", (e) => {
+  // Handle navigation links with data-page attribute
   if (e.target.matches("[data-page]")) {
     e.preventDefault();
     const page = e.target.getAttribute("data-page");
-    window.location.hash = page;
+    if (currentRouter) {
+      currentRouter.navigateTo(page);
+    } else {
+      window.location.hash = page;
+    }
+  }
+
+  // FIXED: Handle post title links specifically
+  if (
+    e.target.matches(".post-title-link") ||
+    e.target.closest(".post-title-link")
+  ) {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const link = e.target.matches(".post-title-link")
+      ? e.target
+      : e.target.closest(".post-title-link");
+    const postId = link.getAttribute("data-post-id");
+
+    console.log("Post title clicked, navigating to post:", postId);
+
+    if (postId && currentRouter) {
+      currentRouter.navigateTo(`post/${postId}`);
+    } else {
+      console.error("No post ID found or router not available");
+    }
   }
 });
 
@@ -368,3 +399,6 @@ function updateOnlineUsers() {
       console.error("Error fetching online users:", err);
     });
 }
+
+// Export router for use in other modules
+export { currentRouter };

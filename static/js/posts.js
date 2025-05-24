@@ -1,4 +1,4 @@
-// posts.js - Posts page functionality
+// posts.js - Posts page functionality with post details integration
 
 // Escape HTML to prevent XSS
 function escapeHTML(str) {
@@ -35,11 +35,8 @@ function showPostsError(message) {
 async function loadPosts(category = "") {
   console.log("=== LOAD POSTS CALLED ===");
   console.log("Loading posts for category:", category);
-  console.log("Current URL:", window.location.href);
 
   const postsContainer = document.getElementById("posts-container");
-  console.log("Posts container found:", !!postsContainer);
-
   if (!postsContainer) {
     console.error("Posts container not found! Cannot load posts.");
     return;
@@ -53,14 +50,9 @@ async function loadPosts(category = "") {
       url += `?category=${encodeURIComponent(category)}`;
     }
 
-    console.log("Fetching from URL:", url);
-
     const response = await fetch(url, {
       credentials: "include",
     });
-
-    console.log("Posts response status:", response.status);
-    console.log("Posts response headers:", response.headers);
 
     if (response.ok) {
       const posts = await response.json();
@@ -81,7 +73,7 @@ async function loadPosts(category = "") {
   }
 }
 
-// Render posts in the container
+// FIXED: Render posts with proper clickable titles that work with router
 function renderPosts(posts) {
   const postsContainer = document.getElementById("posts-container");
 
@@ -99,9 +91,16 @@ function renderPosts(posts) {
   postsContainer.innerHTML = posts
     .map(
       (post) => `
-    <div class="post-item" style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px; cursor: pointer;" 
-         onclick="viewPost('${post.id}')">
-      <h3 style="margin: 0 0 10px 0;">${escapeHTML(post.title)}</h3>
+    <div class="post-item" style="border: 1px solid #ddd; padding: 15px; margin: 10px 0; border-radius: 5px;">
+      <h3 style="margin: 0 0 10px 0;">
+        <a href="#post/${post.id}" 
+           class="post-title-link" 
+           style="text-decoration: none; color: #0066cc; cursor: pointer; transition: color 0.2s;" 
+           data-post-id="${post.id}"
+           data-page="post/${post.id}">
+          ${escapeHTML(post.title)}
+        </a>
+      </h3>
       <div class="post-meta" style="margin-bottom: 10px;">
         <span class="post-category" style="background: #e9ecef; padding: 2px 6px; border-radius: 3px; margin-right: 10px;">
           ${escapeHTML(post.category_id)}
@@ -122,12 +121,8 @@ function renderPosts(posts) {
   `
     )
     .join("");
-}
 
-// Navigate to post details
-function viewPost(postId) {
-  console.log("Viewing post:", postId);
-  window.location.hash = `post/${postId}`;
+  console.log("Posts rendered with clickable titles");
 }
 
 // Create a new post
@@ -172,8 +167,6 @@ async function createPost() {
         category_id: category,
       }),
     });
-
-    console.log("Create post response status:", response.status);
 
     if (response.ok) {
       const newPost = await response.json();
@@ -224,14 +217,21 @@ function setupCategoryFiltering() {
   const categoryList = document.getElementById("category-list");
 
   if (!categoryList) {
-    console.error("Category list not found");
+    console.log("Category list not found - might be on post details page");
     return;
   }
 
-  categoryList.addEventListener("click", (e) => {
+  // Remove existing event listeners
+  const newCategoryList = categoryList.cloneNode(true);
+  categoryList.parentNode.replaceChild(newCategoryList, categoryList);
+
+  newCategoryList.addEventListener("click", (e) => {
     if (e.target.tagName === "LI" && e.target.hasAttribute("data-category")) {
+      e.preventDefault();
+      e.stopPropagation();
+
       // Remove active class from all items
-      categoryList
+      newCategoryList
         .querySelectorAll("li")
         .forEach((li) => li.classList.remove("active"));
 
@@ -241,8 +241,10 @@ function setupCategoryFiltering() {
       const selectedCategory = e.target.getAttribute("data-category");
       console.log("Category selected:", selectedCategory);
 
-      // Load posts for selected category
-      loadPosts(selectedCategory);
+      // Load posts for selected category (only if we're on posts page)
+      if (window.location.hash === "#posts" || window.location.hash === "") {
+        loadPosts(selectedCategory);
+      }
     }
   });
 }
@@ -268,34 +270,22 @@ function updateOnlineUsers() {
 }
 
 // Main setup function for posts page
-export function setupPostsPage() {
-  console.log("Setting up posts page");
+export function setupPostsPage(router) {
+  console.log("Setting up posts page with router:", !!router);
 
-  // Wait for DOM to be fully ready with a longer delay and better checks
   const setupInterval = setInterval(() => {
     const submitBtn = document.getElementById("submit-post");
     const postsContainer = document.getElementById("posts-container");
-    const categoryList = document.getElementById("category-list");
 
-    console.log("Checking for elements:", {
-      submitBtn: !!submitBtn,
-      postsContainer: !!postsContainer,
-      categoryList: !!categoryList,
-    });
-
-    // Only proceed if all essential elements are found
-    if (submitBtn && postsContainer && categoryList) {
+    if (submitBtn && postsContainer) {
       clearInterval(setupInterval);
 
       console.log("All elements found, setting up posts page");
 
       // Set up post creation
-      // Remove any existing listeners
       const newSubmitBtn = submitBtn.cloneNode(true);
       submitBtn.parentNode.replaceChild(newSubmitBtn, submitBtn);
-
       newSubmitBtn.addEventListener("click", createPost);
-      console.log("Post submit button listener added");
 
       // Set up category filtering
       setupCategoryFiltering();
@@ -304,25 +294,264 @@ export function setupPostsPage() {
       updateOnlineUsers();
       setInterval(updateOnlineUsers, 30000);
 
-      // Load initial posts - this is the important part!
-      console.log("Loading initial posts");
+      // Load initial posts
       loadPosts();
     }
   }, 50);
 
-  // Timeout after 5 seconds if elements aren't found
   setTimeout(() => {
     clearInterval(setupInterval);
     console.error("Timeout: Could not find required elements for posts page");
   }, 5000);
 }
 
-// Export function for post details (if needed by other files)
-export function setupPostDetailsPage(postId) {
-  // This would contain the post details functionality
-  // For now, just log that we're setting up post details
-  console.log("Setting up post details page for:", postId);
+// POST DETAILS FUNCTIONALITY
 
-  // You can move the post-details.js content here if needed
-  // or keep it separate and import it
+// Load post details with comments
+async function loadPostDetails(postId) {
+  console.log("Loading post details for:", postId);
+
+  const postDetailsContainer = document.getElementById("post-details");
+  const commentsContainer = document.getElementById("comments-container");
+
+  if (!postDetailsContainer) {
+    console.error("Post details container not found");
+    return;
+  }
+
+  // Show loading state
+  postDetailsContainer.innerHTML = "<p>Loading post...</p>";
+  if (commentsContainer) {
+    commentsContainer.innerHTML = "<p>Loading comments...</p>";
+  }
+
+  try {
+    const response = await fetch(
+      `/api/post-details?id=${encodeURIComponent(postId)}`,
+      {
+        credentials: "include",
+      }
+    );
+
+    if (response.ok) {
+      const data = await response.json();
+      console.log("Received post details:", data);
+
+      renderPostDetails(data.post);
+      renderComments(data.comments || []);
+    } else if (response.status === 401) {
+      console.log("Unauthorized - redirecting to login");
+      window.location.hash = "login";
+    } else if (response.status === 404) {
+      postDetailsContainer.innerHTML = "<p>Post not found.</p>";
+    } else {
+      const errorText = await response.text();
+      console.error("Server error:", errorText);
+      postDetailsContainer.innerHTML = `<p>Error loading post: ${errorText}</p>`;
+    }
+  } catch (err) {
+    console.error("Network error:", err);
+    postDetailsContainer.innerHTML =
+      "<p>Network error occurred while loading post.</p>";
+  }
+}
+
+// Render post details
+function renderPostDetails(post) {
+  const postDetailsContainer = document.getElementById("post-details");
+
+  if (!postDetailsContainer || !post) {
+    console.error("Cannot render post details - container or post missing");
+    return;
+  }
+
+  postDetailsContainer.innerHTML = `
+    <div class="post-header">
+      <h1>${escapeHTML(post.title)}</h1>
+      <div class="post-meta" style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+        <span class="post-category" style="background: #e9ecef; padding: 4px 8px; border-radius: 3px; margin-right: 15px; font-weight: bold;">
+          ${escapeHTML(post.category_id)}
+        </span>
+        <span class="post-stats" style="margin-right: 15px;">
+          👍 ${post.likes || post.like_count || 0} 👎 ${
+    post.dislikes || post.dislike_count || 0
+  }
+        </span>
+        <span class="post-date" style="color: #666; font-size: 0.9em;">
+          Posted: ${new Date(post.created_at).toLocaleString()}
+        </span>
+      </div>
+    </div>
+    <div class="post-content" style="line-height: 1.6; margin: 20px 0; padding: 20px; background: #fff; border: 1px solid #e0e0e0; border-radius: 5px;">
+      <div style="white-space: pre-wrap;">${escapeHTML(post.content)}</div>
+    </div>
+  `;
+}
+
+// Render comments
+function renderComments(comments) {
+  const commentsContainer = document.getElementById("comments-container");
+
+  if (!commentsContainer) {
+    console.error("Comments container not found");
+    return;
+  }
+
+  if (!comments || comments.length === 0) {
+    commentsContainer.innerHTML = `
+      <div style="text-align: center; color: #666; padding: 20px; background: #f8f9fa; border-radius: 5px; margin-top: 15px;">
+        <p>No comments yet. Be the first to comment!</p>
+      </div>
+    `;
+    return;
+  }
+
+  commentsContainer.innerHTML = comments
+    .map(
+      (comment) => `
+      <div class="comment" style="border: 1px solid #e0e0e0; padding: 15px; margin: 10px 0; border-radius: 5px; background: #fff;">
+        <div class="comment-header" style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+          <strong style="color: #333; font-size: 1.1em;">${escapeHTML(
+            comment.nickname || comment.user_id
+          )}</strong>
+          <span style="color: #666; font-size: 0.9em;">
+            ${new Date(comment.created_at).toLocaleString()}
+          </span>
+        </div>
+        <div class="comment-body" style="line-height: 1.5; color: #555;">
+          <div style="white-space: pre-wrap;">${escapeHTML(
+            comment.content || comment.body
+          )}</div>
+        </div>
+      </div>
+    `
+    )
+    .join("");
+}
+
+// Create a new comment
+async function createComment(postId) {
+  const commentTextarea = document.getElementById("comment-text");
+  const submitBtn = document.getElementById("submit-comment");
+
+  if (!commentTextarea) {
+    console.error("Comment textarea not found");
+    return;
+  }
+
+  const commentBody = commentTextarea.value.trim();
+  if (!commentBody) {
+    alert("Please enter a comment.");
+    return;
+  }
+
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Posting...";
+  }
+
+  try {
+    const response = await fetch("/api/comments", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({
+        post_id: postId,
+        body: commentBody, // Frontend sends 'body', backend converts to 'content'
+      }),
+    });
+
+    if (response.ok) {
+      const newComment = await response.json();
+      console.log("Comment created successfully:", newComment);
+
+      // Clear the textarea
+      commentTextarea.value = "";
+
+      // Reload the post details to show the new comment
+      await loadPostDetails(postId);
+
+      // Show success message
+      showCommentSuccessMessage("Comment posted successfully!");
+    } else {
+      const errorText = await response.text();
+      console.error("Failed to create comment:", errorText);
+      alert(`Failed to post comment: ${errorText}`);
+    }
+  } catch (err) {
+    console.error("Error creating comment:", err);
+    alert("An error occurred while posting the comment.");
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Post Comment";
+    }
+  }
+}
+
+// Show success message for comments
+function showCommentSuccessMessage(message) {
+  const successMsg = document.createElement("div");
+  successMsg.style.cssText =
+    "background: #d4edda; color: #155724; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #c3e6cb;";
+  successMsg.textContent = message;
+
+  const commentForm = document.querySelector(".comment-form");
+  if (commentForm) {
+    commentForm.appendChild(successMsg);
+    setTimeout(() => successMsg.remove(), 3000);
+  }
+}
+
+// Setup post details page
+export function setupPostDetailsPage(postId, router) {
+  console.log("Setting up post details page for post ID:", postId);
+
+  const setupInterval = setInterval(() => {
+    const postDetailsContainer = document.getElementById("post-details");
+    const submitCommentBtn = document.getElementById("submit-comment");
+
+    if (postDetailsContainer && submitCommentBtn) {
+      clearInterval(setupInterval);
+
+      console.log("Post details elements found, setting up page");
+
+      // Set up comment submission
+      const newSubmitBtn = submitCommentBtn.cloneNode(true);
+      submitCommentBtn.parentNode.replaceChild(newSubmitBtn, submitCommentBtn);
+
+      newSubmitBtn.addEventListener("click", (e) => {
+        e.preventDefault();
+        createComment(postId);
+      });
+
+      // Set up category filtering for sidebar (if present)
+      setupCategoryFiltering();
+
+      // Set up the back link
+      const backLink = document.querySelector(".back-link");
+      if (backLink) {
+        backLink.addEventListener("click", (e) => {
+          e.preventDefault();
+          if (router) {
+            router.navigateTo("posts");
+          } else {
+            window.location.hash = "posts";
+          }
+        });
+      }
+
+      // Load the post details and comments
+      loadPostDetails(postId);
+    }
+  }, 50);
+
+  setTimeout(() => {
+    clearInterval(setupInterval);
+    console.error(
+      "Timeout: Could not find required elements for post details page"
+    );
+  }, 5000);
 }
