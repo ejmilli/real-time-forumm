@@ -44,6 +44,20 @@ CREATE TABLE IF NOT EXISTS sessions (
 	);`
 
 
+	createCommentsTable := `
+CREATE TABLE IF NOT EXISTS comments (
+	id TEXT PRIMARY KEY,
+	post_id TEXT NOT NULL,
+	user_id TEXT NOT NULL,
+	nickname TEXT NOT NULL,
+	content TEXT NOT NULL,
+	created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+	parent_id TEXT DEFAULT NULL,
+	FOREIGN KEY(post_id) REFERENCES posts(id),
+	FOREIGN KEY(user_id) REFERENCES users(id),
+	FOREIGN KEY(parent_id) REFERENCES comments(id)
+);`
+
 	_, err := db.Exec(createUsersTable)
 	if err != nil {
 		log.Fatalf("error creating users table: %v", err)
@@ -58,6 +72,11 @@ CREATE TABLE IF NOT EXISTS sessions (
 	_, err = db.Exec(createPostsTable) 
 	if err != nil {
 		log.Fatalf("error creating posts table: %v", err)
+	}
+
+		_, err = db.Exec(createCommentsTable) 
+	if err != nil {
+		log.Fatalf("error creating comments table: %v", err)
 	}
 
 	
