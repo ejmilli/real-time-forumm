@@ -30,6 +30,13 @@ type Comment struct {
 	ID        string    `json:"id"`
 	PostID    string    `json:"post_id"`
 	UserID    string    `json:"user_id"`
-	Body      string    `json:"body"`
+	Nickname  string    `json:"nickname"`
+	Content   string    `json:"content"`  // Changed from 'body' to 'content' to match database
 	CreatedAt time.Time `json:"created_at"`
+}
+
+type Session struct {
+	UserID    string
+	Nickname  string
+	ExpiresAt time.Time
 }
