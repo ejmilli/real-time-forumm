@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <link rel="stylesheet" href="css/style.css" />
+    <title>Forum</title>
+  </head>
+  <body>
+    <nav></nav>
+
+    <main></main>
+
+    <!-- Register Section -->
+    <template id="signupTemplate">
+      <section id="signup">
+        <div class="image-section">
+          <div class="shape-1"></div>
+          <div class="shape-2"></div>
+          <div class="image-content">
+            <h1>Welcome Back!</h1>
+            <p>
+              Log in to your account to continue your journey with us. We're
+              excited to show you what's new!
+            </p>
+          </div>
+        </div>
+
+        <div class="form-section">
+          <div class="form-container">
+            <form id="form" method="POST">
+              <h2>SignUp</h2>
+              <div class="input-group">
+                <label for="firstname">First Name</label>
+                <input type="text" name="firstname" id="firstname" required />
+              </div>
+              <div class="input-group">
+                <label for="lastname">Last Name</label>
+                <input type="text" name="lastname" id="lastname" />
+              </div>
+              <div class="input-group">
+                <label for="nickname">Nickname</label>
+                <input type="text" name="nickname" id="nickname" required />
+              </div>
+              <div class="input-group">
+                <label for="age">Age</label>
+                <input type="number" name="age" min="13" id="age" required />
+              </div>
+              <div class="input-group gender">
+                <label for="gender">Gender</label>
+                <input
+                  type="radio"
+                  name="gender"
+                  id="male"
+                  value="Male"
+                  required
+                />
+                <label for="male">Male</label>
+                <input
+                  type="radio"
+                  name="gender"
+                  id="female"
+                  value="Female"
+                  required
+                />
+                <label for="female">Female</label>
+                <input
+                  type="radio"
+                  name="gender"
+                  id="other"
+                  value="Other"
+                  required
+                  checked
+                />
+                <label for="other">Other</label>
+              </div>
+              <div class="input-group">
+                <label for="email">Email</label>
+                <input type="email" name="email" id="email" />
+              </div>
+              <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" required />
+              </div>
+              <div class="input-group">
+                <label for="confirmPassword">Confirm Password</label>
+                <input
+                  type="password"
+                  name="confirmPassword"
+                  id="confirmPassword"
+                  required
+                />
+              </div>
+              <p>
+                Already have an account?
+                <a href="#login" data-page="login" class="toLogIn">Login</a>
+              </p>
+              <button type="submit">Sign Up</button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </template>
+
+    <!-- Login Section -->
+    <template id="loginTemplate">
+      <section id="login">
+        <div class="image-section">
+          <div class="shape-1"></div>
+          <div class="shape-2"></div>
+          <div class="image-content">
+            <h1>Welcome Back!</h1>
+            <p>
+              Log in to your account to continue your journey with us. We're
+              excited to show you what's new!
+            </p>
+          </div>
+        </div>
+        <div class="form-section">
+          <div class="form-container">
+            <form id="loginForm">
+              <h2>Login</h2>
+              <div class="input-group">
+                <label for="nicknameRadio">Nickname</label>
+                <input
+                  type="radio"
+                  name="loginType"
+                  value="nickname"
+                  id="nicknameRadio"
+                  required
+                />
+                <label for="emailRadio">Email</label>
+                <input
+                  type="radio"
+                  name="loginType"
+                  value="email"
+                  id="emailRadio"
+                  required
+                />
+              </div>
+
+              <div id="nicknameInput" class="input-group">
+                <label for="nickname">Enter your Nickname</label>
+                <input type="text" id="nickname" name="nickname" />
+              </div>
+
+              <div id="emailInput" class="input-group">
+                <label for="email">Enter your Email</label>
+                <input type="email" id="email" name="email" />
+              </div>
+
+              <div class="input-group">
+                <label for="password">Password</label>
+                <input type="password" name="password" id="password" required />
+              </div>
+              <p>
+                Don't have an account?
+                <a href="#signup" data-page="signup">SignUp</a>
+              </p>
+              <button class="btn" type="submit">Login</button>
+            </form>
+          </div>
+        </div>
+      </section>
+    </template>
+
+    <template id="homeTemplate">
+      <div class="home-page">
+        <header class="hero split-layout">
+          <div class="hero-left">
+            <h1 class="site-title">&lt;/devconfessions&gt;</h1>
+            <div class="intro-message">
+              <h2>Welcome to &lt;/devconfessions&gt;</h2>
+              <p>
+                A safe space for developers to share their true feelings about
+                tech.
+              </p>
+            </div>
+            <div class="cta-buttons">
+              <a href="#signup" class="cta-button signup-btn" data-page="signup"
+                >Sign Up</a
+              >
+              <a href="#login" class="cta-button login-btn" data-page="login"
+                >Login</a
+              >
+            </div>
+          </div>
+
+          <div class="hero-right">
+            <!-- You can replace this with an image, quote, or animation -->
+            <div class="hero-placeholder">
+              <p>🧠 Speak your dev mind.<br />No filters. Just feels.</p>
+            </div>
+          </div>
+        </header>
+      </div>
+    </template>
+
+    <!-- Chat Template -->
+    <template id="chatTemplate">
+      <div class="chat-container">
+        <h2>Chat</h2>
+
+        <!-- Dynamic Chat Box - HIDDEN BY DEFAULT -->
+        <div id="active-chat-window" class="hidden">
+          <h3 id="chatWithName">Chat</h3>
+          <div id="messagesOutput"></div>
+          <!-- 🔔 IMPORTANT: Typing indicator moved OUTSIDE messagesOutput -->
+          <div id="typing-indicator" class="hidden">Someone is typing...</div>
+          <div class="input-row">
+            <textarea
+              id="messageInput"
+              placeholder="Type your message..."
+              data-typing-setup="false"
+            ></textarea>
+            <button id="sendMessageBtn">Send</button>
+          </div>
+        </div>
+      </div>
+    </template>
+
+    <!-- Posts Template -->
+    <template id="postsTemplate">
+      <div class="forum-wrapper" style="display: flex">
+        <aside class="sidebar">
+          <h2>Categories</h2>
+          <ul id="category-list">
+            <li class="active" data-category="all">All Posts</li>
+            <li data-category="general">General</li>
+            <li data-category="golang">Golang</li>
+            <li data-category="html">HTML</li>
+            <li data-category="javascript">JavaScript</li>
+            <li data-category="css">CSS</li>
+          </ul>
+        </aside>
+
+        <section class="main-content">
+          <div id="post-creator">
+            <h2>Create a Post</h2>
+            <input type="text" id="title" placeholder="Title" />
+            <select id="category-select">
+              <option value="general">General</option>
+              <option value="golang">Golang</option>
+              <option value="html">HTML</option>
+              <option value="javascript">JavaScript</option>
+              <option value="css">CSS</option>
+            </select>
+            <textarea
+              id="content"
+              placeholder="What's on your mind?"
+            ></textarea>
+            <button id="submit-post">Post</button>
+          </div>
+
+          <h2>Recent Posts</h2>
+          <div id="posts-container">
+            <!-- Posts will be displayed here -->
+            <p>Loading posts...</p>
+          </div>
+        </section>
+      </div>
+    </template>
+
+    <!-- Posts Details Template -->
+
+    <template id="postDetailsTemplate">
+      <div class="forum-wrapper" style="display: flex">
+        <aside class="sidebar">
+          <h2>Categories</h2>
+          <ul id="category-list">
+            <li class="active" data-category="all">All Posts</li>
+            <li data-category="general">General</li>
+            <li data-category="golang">Golang</li>
+            <li data-category="html">HTML</li>
+            <li data-category="javascript">JavaScript</li>
+            <li data-category="css">CSS</li>
+          </ul>
+        </aside>
+
+        <section class="main-content">
+          <a href="#posts" class="back-link">← Back to Posts</a>
+
+          <div id="post-details" class="post-detail">
+            <!-- Post details will be displayed here -->
+            <p>Loading post...</p>
+          </div>
+
+          <div class="comments-section">
+            <h3>Comments</h3>
+
+            <div class="comment-form">
+              <textarea
+                id="comment-text"
+                placeholder="Write a comment..."
+              ></textarea>
+              <button id="submit-comment">Post Comment</button>
+            </div>
+
+            <div id="comments-container">
+              <!-- Comments will be displayed here -->
+              <p>Loading comments...</p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </template>
+
+    <!-- Script -->
+    <script type="module" src="js/app.js"></script>
+  </body>
+</html>
