@@ -1,5 +1,3 @@
-// posts.js - Posts page functionality with post details integration
-
 // Escape HTML to prevent XSS
 function escapeHTML(str) {
   if (!str) return "";
@@ -301,7 +299,6 @@ export function setupPostsPage(router) {
 
   setTimeout(() => {
     clearInterval(setupInterval);
-    console.error("Timeout: Could not find required elements for posts page");
   }, 5000);
 }
 

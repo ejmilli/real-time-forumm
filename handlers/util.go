@@ -3,74 +3,17 @@ package handlers
 import (
 	"database/sql"
 	"fmt"
+	"log"
 	"net/http"
 	"real-time-forum/models"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/gofrs/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
-
-
-func SignupHandler(db *sql.DB) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Method != "POST" {
-			http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
-			return
-		}
-
-		contentType := r.Header.Get("Content-Type")
-		if strings.Contains(contentType, "multipart/form-data") {
-			if err := r.ParseMultipartForm(10 << 20); err != nil {
-				http.Error(w, "Error parsing multipart form: "+err.Error(), http.StatusBadRequest)
-				return
-			}
-		} else {
-			if err := r.ParseForm(); err != nil {
-				http.Error(w, "Error parsing form: "+err.Error(), http.StatusBadRequest)
-				return
-			}
-		}
-
-		firstName := getFormValue(r, []string{"firstname", "firstName", "first_name", "FirstName"})
-		lastName := getFormValue(r, []string{"lastname", "lastName", "last_name", "LastName"})
-		nickname := getFormValue(r, []string{"nickname", "nickName", "nick_name", "NickName"})
-		ageStr := getFormValue(r, []string{"age", "Age"})
-		gender := getFormValue(r, []string{"gender", "Gender"})
-		email := getFormValue(r, []string{"email", "Email"})
-		password := getFormValue(r, []string{"password", "Password", "passwd", "Passwd"})
-		confirmPassword := getFormValue(r, []string{"confirmPassword", "confirm_password", "ConfirmPassword"})
-
-		user, err := processAndValidateUser(firstName, lastName, nickname, ageStr, gender, email, password, confirmPassword, db)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusBadRequest)
-			return
-		}
-
-		if err := createUser(db, user); err != nil {
-			status := http.StatusInternalServerError
-			if strings.Contains(err.Error(), "UNIQUE constraint failed") {
-				status = http.StatusConflict
-			}
-			http.Error(w, err.Error(), status)
-			return
-		}
-
-		w.WriteHeader(http.StatusCreated)
-		fmt.Fprintf(w, "User created successfully")
-	}
-}
-
-func getFormValue(r *http.Request, keys []string) string {
-	for _, key := range keys {
-		if value := r.FormValue(key); value != "" {
-			return value
-		}
-	}
-	return ""
-}
 
 func processAndValidateUser(firstName, lastName, nickname, ageStr, gender, email, password, confirmPassword string, db *sql.DB) (*models.User, error) {
 	firstName = strings.TrimSpace(firstName)
@@ -146,4 +89,33 @@ func createUser(db *sql.DB, user *models.User) error {
 	return err
 }
 
+func saveMessage(db *sql.DB, chatID int, senderID, message string) (int64, error) {
+	result, err := db.Exec(`
+		INSERT INTO messages (chat_id, sender_id, content, sent_at)
+		VALUES (?, ?, ?, ?)
+	`, chatID, senderID, message, time.Now())
 
+	if err != nil {
+		return 0, err
+	}
+
+	return result.LastInsertId()
+}
+
+// UpdateLastActive updates the session's last_active timestamp if valid
+func UpdateLastActive(db *sql.DB, w http.ResponseWriter, r *http.Request) {
+	session := GetSession(db, r)
+	if session != nil && session.ExpiresAt.After(time.Now()) {
+		if cookie, err := r.Cookie("session"); err == nil {
+			_, err = db.Exec(
+				"UPDATE sessions SET last_active = ? WHERE id = ?",
+				time.Now(), cookie.Value,
+			)
+			if err != nil {
+				log.Printf("Last active update error: %v", err)
+			} else {
+				log.Printf("Updated last_active for session: %s", cookie.Value)
+			}
+		}
+	}
+}

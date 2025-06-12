@@ -1,4 +1,3 @@
-// Updated router.js with parameter support and authentication integration
 export class Router {
   constructor() {
     this.routes = {};
@@ -81,11 +80,11 @@ export class Router {
         }
       } else {
         console.warn(`Template not found for route: ${path}`);
-        this.main.innerHTML = `<p>Template not found: ${route.templateId}</p>`;
+        this.main.innerHTML = `<h1>Template not found: ${route.templateId}</h1>`;
       }
     } else {
       console.warn(`No route found for ${path}`);
-      this.main.innerHTML = `<p>Page not found: ${path}</p>`;
+      this.main.innerHTML = `<h1>Page not found: ${path}</h1>`;
     }
   }
 

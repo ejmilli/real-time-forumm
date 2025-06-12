@@ -165,32 +165,18 @@
       </section>
     </template>
 
-    <!--Home Page-->
-
     <template id="homeTemplate">
-      <div class="phone-container">
-        <div class="status-bar">
-          <span class="time">9:41</span>
-          <span class="icons">
-            <span>📶</span>
-            <span>📶</span>
-            <span>🔋</span>
-          </span>
-        </div>
-
-        <div class="content">
-          <div class="header">
-            <h1>DevConfessions</h1>
-            <p>Tech opinions & developer secrets</p>
-          </div>
-
-          <div class="welcome-message">
-            <h2>Welcome to DevConfessions</h2>
-            <p>
-              A safe space for developers to share their true feelings about
-              tech
-            </p>
-
+      <div class="home-page">
+        <header class="hero split-layout">
+          <div class="hero-left">
+            <h1 class="site-title">&lt;/devconfessions&gt;</h1>
+            <div class="intro-message">
+              <h2>Welcome to &lt;/devconfessions&gt;</h2>
+              <p>
+                A safe space for developers to share their true feelings about
+                tech.
+              </p>
+            </div>
             <div class="cta-buttons">
               <a href="#signup" class="cta-button signup-btn" data-page="signup"
                 >Sign Up</a
@@ -201,102 +187,38 @@
             </div>
           </div>
 
-          <div class="tech-option negative">
-            <span>TypeScript</span>
-          </div>
-
-          <div class="tech-option positive">
-            <span>VS Code</span>
-          </div>
-
-          <div class="tech-option positive">
-            <span>Stack Overflow</span>
-          </div>
-
-          <div class="tech-option neutral">
-            <span>JavaScript</span>
-            <div class="reaction-buttons">
-              <span class="reaction-btn thumbs-down">👎</span>
-              <span class="reaction-btn thumbs-up">👍</span>
+          <div class="hero-right">
+            <!-- You can replace this with an image, quote, or animation -->
+            <div class="hero-placeholder">
+              <p>🧠 Speak your dev mind.<br />No filters. Just feels.</p>
             </div>
           </div>
-
-          <div class="tech-option neutral">
-            <span>React</span>
-            <div class="reaction-buttons">
-              <span class="reaction-btn thumbs-down">👎</span>
-              <span class="reaction-btn thumbs-up">👍</span>
-            </div>
-          </div>
-
-          <div class="tech-option neutral">
-            <span>Daily Standups</span>
-            <div class="reaction-buttons">
-              <span class="reaction-btn thumbs-down">👎</span>
-              <span class="reaction-btn thumbs-up">👍</span>
-            </div>
-          </div>
-
-          <div class="tech-option neutral">
-            <span>Dark Mode IDEs</span>
-            <div class="reaction-buttons">
-              <span class="reaction-btn thumbs-down">👎</span>
-              <span class="reaction-btn thumbs-up">👍</span>
-            </div>
-          </div>
-
-          <div class="tech-option neutral">
-            <span>Debugging in Production</span>
-            <div class="reaction-buttons">
-              <span class="reaction-btn thumbs-down">👎</span>
-              <span class="reaction-btn thumbs-up">👍</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="tab-bar">
-          <div class="tab">
-            <span class="tab-icon">🚀</span>
-            <span>Home</span>
-          </div>
-          <div class="tab">
-            <span class="tab-icon">📅</span>
-            <span>Feed</span>
-          </div>
-          <div class="tab active">
-            <span class="tab-icon">💬</span>
-            <span>Chat</span>
-          </div>
-          <div class="tab">
-            <span class="tab-icon">🔖</span>
-            <span>Saved</span>
-          </div>
-          <div class="tab">
-            <span class="tab-icon">👤</span>
-            <span>Profile</span>
-          </div>
-        </div>
+        </header>
       </div>
     </template>
 
+    <!-- Chat Template -->
     <template id="chatTemplate">
-      <h2>Chat Room</h2>
-      <div
-        id="chatBox"
-        style="height: 300px; overflow-y: scroll; border: 1px solid #ccc"
-      ></div>
-      <div id="onlineUsersContainer">
-        <h3>Online Users</h3>
-        <ul id="onlineUsersList"></ul>
+      <div class="chat-container">
+        <h2>Chat</h2>
+
+        <!-- Dynamic Chat Box - HIDDEN BY DEFAULT -->
+        <div id="active-chat-window" class="hidden">
+          <h3 id="chatWithName">Chat</h3>
+          <div id="messagesOutput"></div>
+          <!-- 🔔 IMPORTANT: Typing indicator moved OUTSIDE messagesOutput -->
+          <div id="typing-indicator" class="hidden">Someone is typing...</div>
+          <div class="input-row">
+            <textarea
+              id="messageInput"
+              placeholder="Type your message..."
+              data-typing-setup="false"
+            ></textarea>
+            <button id="sendMessageBtn">Send</button>
+          </div>
+        </div>
       </div>
-      <input type="text" id="chatInput" placeholder="Type your message..." />
-      <button id="sendBtn">Send</button>
     </template>
-    <!-- Online Users-->
-    <div id="onlineUsersContainer">
-      <h3>Currently Online</h3>
-      <ul id="onlineUsersList"></ul>
-    </div>
 
     <!-- Posts Template -->
     <template id="postsTemplate">
@@ -314,7 +236,6 @@
         </aside>
 
         <section class="main-content">
-          <h1>My Forum</h1>
           <div id="post-creator">
             <h2>Create a Post</h2>
             <input type="text" id="title" placeholder="Title" />
@@ -387,144 +308,5 @@
 
     <!-- Script -->
     <script type="module" src="js/app.js"></script>
-    <!-- Add this to your existing HTML, just before the closing </body> tag -->
-
-    <div
-      id="debug-section"
-      style="
-        position: fixed;
-        top: 10px;
-        right: 10px;
-        width: 300px;
-        background: white;
-        border: 2px solid #007bff;
-        border-radius: 8px;
-        padding: 10px;
-        z-index: 1000;
-        font-size: 12px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      "
-    >
-      <h4 style="margin: 0 0 10px 0; color: #007bff">🔍 Debug Panel</h4>
-      <div>
-        Session:
-        <span id="debug-session" style="font-weight: bold">Checking...</span
-        ><br />
-        API: <span id="debug-api" style="font-weight: bold">Testing...</span
-        ><br />
-        DOM: <span id="debug-dom" style="font-weight: bold">Checking...</span>
-      </div>
-      <button
-        onclick="runQuickDebug()"
-        style="
-          margin-top: 10px;
-          padding: 5px 10px;
-          background: #007bff;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-        "
-      >
-        🔄 Debug
-      </button>
-      <button
-        onclick="document.getElementById('debug-section').style.display='none'"
-        style="
-          margin-top: 10px;
-          padding: 5px 10px;
-          background: #dc3545;
-          color: white;
-          border: none;
-          border-radius: 4px;
-          cursor: pointer;
-        "
-      >
-        ✕ Hide
-      </button>
-    </div>
-
-    <script>
-      // Quick debug functions - add these to your existing JavaScript
-      function debugStatus(elementId, status, color) {
-        const element = document.getElementById(elementId);
-        if (element) {
-          element.textContent = status;
-          element.style.color = color;
-        }
-      }
-
-      async function runQuickDebug() {
-        console.log("=== QUICK DEBUG START ===");
-
-        // Test DOM elements
-        const elements = [
-          "posts-container",
-          "submit-post",
-          "category-list",
-          "title",
-          "content",
-          "category-select",
-        ];
-        const missingElements = elements.filter(
-          (id) => !document.getElementById(id)
-        );
-
-        if (missingElements.length === 0) {
-          debugStatus("debug-dom", "✓ All found", "green");
-          console.log("✓ All DOM elements found");
-        } else {
-          debugStatus(
-            "debug-dom",
-            `✗ Missing: ${missingElements.join(", ")}`,
-            "red"
-          );
-          console.log("✗ Missing DOM elements:", missingElements);
-        }
-
-        // Test session
-        try {
-          const sessionResponse = await fetch("/api/check-auth", {
-            credentials: "include",
-          });
-          if (sessionResponse.ok) {
-            debugStatus("debug-session", "✓ Authenticated", "green");
-            console.log("✓ Session valid");
-          } else {
-            debugStatus("debug-session", "✗ Not authenticated", "red");
-            console.log("✗ Session invalid:", sessionResponse.status);
-          }
-        } catch (e) {
-          debugStatus("debug-session", "✗ Check failed", "red");
-          console.log("✗ Session check error:", e.message);
-        }
-
-        // Test API
-        try {
-          const apiResponse = await fetch("/api/posts", {
-            credentials: "include",
-          });
-          if (apiResponse.ok) {
-            const posts = await apiResponse.json();
-            debugStatus("debug-api", `✓ ${posts.length} posts`, "green");
-            console.log("✓ API working, posts:", posts.length);
-          } else {
-            const errorText = await apiResponse.text();
-            debugStatus("debug-api", `✗ Error ${apiResponse.status}`, "red");
-            console.log("✗ API error:", apiResponse.status, errorText);
-          }
-        } catch (e) {
-          debugStatus("debug-api", "✗ Request failed", "red");
-          console.log("✗ API request error:", e.message);
-        }
-
-        console.log("=== QUICK DEBUG END ===");
-      }
-
-      // Auto-run debug when page loads (if debug panel exists)
-      if (document.getElementById("debug-section")) {
-        setTimeout(runQuickDebug, 1000);
-      }
-    </script>
   </body>
 </html>

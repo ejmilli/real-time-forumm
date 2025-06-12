@@ -1,18 +1,58 @@
-document.addEventListener("DOMContentLoaded", function () {
-  const router = new Router();
+// Setup signup form functionality
+export function setupSignupForm(router) {
+  console.log("Setting up signup form");
+  const form = document.querySelector("#form");
 
-  // Add a route handler for the signup page
-  router.addRoute("signup", "signupTemplate", setupSignupForm);
+  if (!form) {
+    console.error("Signup form not found");
+    return;
+  }
 
-  router.start();
-});
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    console.log("Form submitted");
 
+    const formData = new FormData(form);
+
+    // Log all form fields (except password)
+    console.log("Form data collected:");
+    for (const [name, value] of formData.entries()) {
+      if (name !== "password" && name !== "confirmPassword") {
+        console.log(` ${name}: ${value}`);
+      } else {
+        console.log(` ${name}: [HIDDEN]`);
+      }
+    }
+
+    try {
+      const response = await fetch("/signup", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await response.text();
+      console.log("Server response:", result);
+
+      if (response.ok) {
+        showMessage("Signup successful! Redirecting to login...", false);
+        setTimeout(() => {
+          router.navigateTo("login");
+        }, 2000);
+      } else {
+        showMessage(result || "Signup failed", true);
+      }
+    } catch (error) {
+      console.error("Error during signup:", error);
+      showMessage("An error occurred. Please try again.", true);
+    }
+  });
+}
+
+// Message display function for signup
 function showMessage(message, isError = true) {
-  // Remove any existing message
   const existingMsg = document.querySelector(".message");
   if (existingMsg) existingMsg.remove();
 
-  // Create message element
   const msgElement = document.createElement("div");
   msgElement.className = `message ${isError ? "error" : "success"}`;
   msgElement.textContent = message;
@@ -25,62 +65,28 @@ function showMessage(message, isError = true) {
   if (isError) {
     msgElement.style.backgroundColor = "#ffdddd";
     msgElement.style.color = "#ff0000";
+    msgElement.style.border = "1px solid #ff0000";
   } else {
     msgElement.style.backgroundColor = "#ddffdd";
     msgElement.style.color = "#008800";
+    msgElement.style.border = "1px solid #008800";
   }
 
-  // Add to form
+  // Add to the signup form
   const form = document.getElementById("form");
-  form
-    .querySelector('button[type="submit"]')
-    .insertAdjacentElement("beforebegin", msgElement);
+  if (form) {
+    const submitButton = form.querySelector('button[type="submit"]');
+    if (submitButton) {
+      submitButton.insertAdjacentElement("beforebegin", msgElement);
+    }
+  }
 
   // Auto dismiss success messages
   if (!isError) {
     setTimeout(() => {
-      msgElement.remove();
-    }, 5000);
-  }
-}
-
-// Router class for handling navigation
-class Router {
-  constructor() {
-    this.routes = {};
-    this.main = document.querySelector("main");
-  }
-
-  addRoute(path, templateId, callback) {
-    this.routes[path] = { templateId, callback };
-  }
-
-  navigateTo(path) {
-    history.pushState(null, null, `#${path}`);
-    this.loadRoute();
-  }
-
-  loadRoute() {
-    let path = window.location.hash.substring(1) || "/";
-    const route = this.routes[path];
-
-    if (route) {
-      const template = document.getElementById(route.templateId);
-      this.main.innerHTML = "";
-      this.main.appendChild(document.importNode(template.content, true));
-
-      if (route.callback) {
-        route.callback();
+      if (msgElement.parentNode) {
+        msgElement.remove();
       }
-    }
-  }
-
-  start() {
-    window.addEventListener("hashchange", () => this.loadRoute());
-    if (!window.location.hash) {
-      window.location.hash = "#/";
-    } else {
-      this.loadRoute();
-    }
+    }, 5000);
   }
 }
